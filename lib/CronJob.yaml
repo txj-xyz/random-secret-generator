@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: secret-generator
+  namespace: default
+spec:
+  schedule: "*/20 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: service-account-cronjob
+          containers:
+          - name: secret-generator
+            image: bitnami/kubectl:latest
+            command:
+              - /bin/sh
+              - "-c"
+              - |
+                /bin/bash <<'EOF'
+                cd /tmp
+
+                uuid() {
+                  RND_PASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)
+                  RND_PASS_ENCODED=$(echo -n "$RND_PASS" | base64)
+                  echo $RND_PASS_ENCODED
+                }
+
+                kubectl get secret rotating-secret-password -n default -oyaml > secret.yaml
+                key_list=("MY_PASSWORD_1" "MY_PASSWORD_2" "MY_PASSWORD_3" "MY_PASSWORD_4")
+                for password_key in "${key_list[@]}"; do
+                  sed -i "s/$password_key: .*/$password_key: $(uuid)/g" secret.yaml
+                done
+
+                if [ $? -eq 0 ]; then
+                  echo "------ Applying New Secret -------"
+                  kubectl apply -f secret.yaml
+                  echo "----------------------------------"
+                  exit 0
+                else
+                  echo "[ERROR] Failed to update secret file using 'sed'."
+                  exit 1
+                fi
+
+                exit $? 
+                EOF
+          
+          restartPolicy: OnFailure
+          ttlSecondsAfterFinished: 0

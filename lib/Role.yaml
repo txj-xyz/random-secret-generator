@@ -1,0 +1,13 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: default
+  name: secrets-editor-cronjob
+rules:
+  - apiGroups: [""]
+    resources:
+      - secrets
+    verbs:
+      - 'patch'
+      - 'get'
+      - 'create'

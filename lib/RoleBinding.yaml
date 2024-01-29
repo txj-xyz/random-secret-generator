@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cronjob-runner-binding
+  namespace: default
+roleRef:
+  apiGroup: ""
+  kind: Role
+  name: secrets-editor-cronjob
+subjects:
+  - kind: ServiceAccount
+    name: service-account-cronjob
+    namespace: default
