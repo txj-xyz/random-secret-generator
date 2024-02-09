@@ -19,7 +19,10 @@ kubectl apply -f $(pwd)/random-secret-generator/lib/
 
 # --------------------------
 # Use your shell to generate the template and deploy it manually
-rm -r $(pwd)/random-secret-generator/Deployment.yaml 2>/dev/null; for i in $(find $(pwd)/random-secret-generator/lib/ -type f); do kv=$(cat $i && echo -e "\n---"); echo $kv >> $(pwd)/random-secret-generator/Deployment.yaml; done
+rm -r $(pwd)/random-secret-generator/Deployment.yaml 2>/dev/null; \
+    for i in $(find $(pwd)/random-secret-generator/lib/ -type f); do \
+    kv=$(cat $i && echo -e "\n---"); echo $kv >> $(pwd)/random-secret-generator/Deployment.yaml; \
+    done
 
 # Deploy the freshly generated YAML
 kubectl apply -f Deployment.yaml
